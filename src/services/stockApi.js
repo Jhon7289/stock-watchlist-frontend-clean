@@ -1,13 +1,8 @@
-export const getWatchlists = () =>
-  API.get("/api/watchlists");
+const API_URL = import.meta.env.VITE_API_URL;
 
-export const saveWatchlists = (watchlists) =>
-  API.post("/api/watchlists", watchlists);
+const API = axios.create({
+  baseURL: API_URL,
+});
 
 export const searchStocks = (name) =>
   API.get(`/api/search/${name}`);
-
-export const getHistory = (code, range = "1M") =>
-  API.get(`/api/history/${code}?range=${range}`);
-
-export const socket = io(API_URL);
