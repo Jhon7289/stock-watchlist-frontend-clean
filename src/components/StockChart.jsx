@@ -47,12 +47,10 @@ function StockChart({
         // Backend returns: { meta, values: [...] }
         const values = res.data?.values || [];
 
-        const chartData = values
-          .filter((item) => item.datetime && item.close != null)
-          .map((item) => ({
-            date: new Date(item.datetime).toLocaleDateString(),
-            price: Number(item.close)
-          }));
+        const chartData = res.data.values.map((item) => ({
+  date: new Date(item.datetime).toLocaleDateString(),
+  price: item.close
+}));
 
         setData(chartData);
 
