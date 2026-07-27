@@ -20,8 +20,17 @@ export const searchStocks = (name) =>
   API.get(`/api/search/${name}`);
 
 // Get stock history
-export const getHistory = (code, range = "1M") =>
-  API.get(`/api/history/${code}?range=${range}`);
+export const getHistory = async (code, range = "1D") => {
+  const response = await axios.get(
+    `${API_URL}/api/history/${code}`,
+    {
+      params: {
+        range
+      }
+    }
+  );
 
+  return response;
+};
 // Socket connection
 export const socket = io(API_URL);
