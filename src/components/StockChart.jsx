@@ -13,7 +13,6 @@ import {
 
 import { getHistory } from "../services/stockApi";
 
-
 function StockChart({
   code,
   name = "",
@@ -22,221 +21,204 @@ function StockChart({
   compact = false
 }) {
   const [data, setData] = useState([]);
-
-
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
 
   const priceChange =
-  data.length > 1
-    ? data[data.length - 1].price - data[0].price
-    : 0;
+    data.length > 1
+      ? data[data.length - 1].price - data[0].price
+      : 0;
 
-    const priceChangePercent =
-  data.length > 1 && data[0].price !== 0
-    ? (priceChange / data[0].price) * 100
-    : 0;
+  const priceChangePercent =
+    data.length > 1 && data[0].price !== 0
+      ? (priceChange / data[0].price) * 100
+      : 0;
 
-    const isUp = priceChange >= 0;
-
-
-
+  const isUp = priceChange >= 0;
 
   useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-  const loadHistory = async () => {
+        const res = await getHistory(code, range);
 
-    try {
+        // Backend returns: { meta, values: [...] }
+        const values = res.data?.values || [];
 
-      setLoading(true);
-      setError("");
+        const chartData = values
+          .filter((item) => item.datetime && item.close != null)
+          .map((item) => ({
+            date: new Date(item.datetime).toLocaleDateString(),
+            price: Number(item.close)
+          }));
 
-      const res =
-        await getHistory(code, range);
+        setData(chartData);
 
-      const chartData =
-        res.data.map((item) => ({
-          date: new Date(item.date)
-            .toLocaleDateString(),
+      } catch (error) {
+        console.error("CHART ERROR:", error);
+        setError("Failed to load chart data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-          price: item.price
-        }));
-
-      setData(chartData);
-
-    } catch (error) {
-
-      setError(
-        "Failed to load chart data"
-      );
-
-    } finally {
-
-      setLoading(false);
-
+    if (code) {
+      loadHistory();
     }
-
-  };
-
-  loadHistory();
-
-}, [code, range]);
+  }, [code, range]);
 
   return (
+    <div className="stock-card">
 
-  <div className="stock-card">
+      {/* Stock Header */}
+      <div className="stock-header">
 
+        <div>
+          <h3>
+            {code} {name}
+          </h3>
 
-    {/* Stock Header */}
+          <div className="current-price">
+            ¥
+            {data.length > 0
+              ? data[data.length - 1].price.toLocaleString()
+              : "--"}
+          </div>
+        </div>
 
-    <div className="stock-header">
+        <div
+          className={`price-change ${
+            isUp ? "up" : "down"
+          }`}
+        >
+          {isUp ? "▲" : "▼"}
 
-      <div>
+          ¥{Math.abs(priceChange).toLocaleString()}
 
-        <h3>
-  {code} {name}
-</h3>
-
-        <div className="current-price">
-
-          ¥{data.length > 0
-            ? data[data.length - 1].price.toLocaleString()
-            : "--"
-          }
-
+          ({Math.abs(priceChangePercent).toFixed(2)}%)
         </div>
 
       </div>
 
+      {/* Time Filter */}
+      <div className="time-filter">
 
+        <button
+          className={range === "1D" ? "active" : ""}
+          onClick={() => setRange("1D")}
+        >
+          1D
+        </button>
+
+        <button
+          className={range === "1W" ? "active" : ""}
+          onClick={() => setRange("1W")}
+        >
+          1W
+        </button>
+
+        <button
+          className={range === "1M" ? "active" : ""}
+          onClick={() => setRange("1M")}
+        >
+          1M
+        </button>
+
+        <button
+          className={range === "1Y" ? "active" : ""}
+          onClick={() => setRange("1Y")}
+        >
+          1Y
+        </button>
+
+      </div>
+
+      {/* Chart */}
       <div
-  className={`price-change ${
-    isUp ? "up" : "down"
-  }`}
->
-  {isUp ? "▲" : "▼"}
+        style={{
+          width: "100%",
+          height: compact ? 120 : 250
+        }}
+      >
 
-  ¥{Math.abs(priceChange).toLocaleString()}
+        {loading ? (
 
-  ({Math.abs(priceChangePercent).toFixed(2)}%)
-</div>
+          <div className="loading">
+            Loading chart...
+          </div>
 
-    </div>
+        ) : error ? (
 
+          <div className="error">
+            ⚠️ {error}
+          </div>
 
-    {/* Time Filter */}
+        ) : data.length === 0 ? (
 
-    <div className="time-filter">
+          <div className="error">
+            ⚠️ No chart data available
+          </div>
 
-  <button
-    className={range === "1D" ? "active" : ""}
-    onClick={() => setRange("1D")}
-  >
-    1D
-  </button>
+        ) : (
 
-  <button
-    className={range === "1W" ? "active" : ""}
-    onClick={() => setRange("1W")}
-  >
-    1W
-  </button>
+          <ResponsiveContainer width="100%" height="100%">
 
-  <button
-    className={range === "1M" ? "active" : ""}
-    onClick={() => setRange("1M")}
-  >
-    1M
-  </button>
+            <LineChart data={data}>
 
-  <button
-    className={range === "1Y" ? "active" : ""}
-    onClick={() => setRange("1Y")}
-  >
-    1Y
-  </button>
+              <CartesianGrid
+                strokeDasharray="3 3"
+              />
 
-</div>
+              <XAxis dataKey="date" />
 
+              <YAxis />
 
-    {/* Chart */}
+              <Tooltip
+                content={<CustomTooltip />}
+              />
 
-    <div
-  style={{
-    width: "100%",
-    height: compact ? 120 : 250
-  }}
->
+              <Line
+                type="monotone"
+                dataKey="price"
+                stroke={
+                  isUp
+                    ? "#16a34a"
+                    : "#dc2626"
+                }
+                strokeWidth={3}
+                dot={false}
+                activeDot={{
+                  r: 6
+                }}
+              />
 
-      {loading ? (
+            </LineChart>
 
-        <div className="loading">
-          Loading chart...
-        </div>
+          </ResponsiveContainer>
 
-      ) : error ? (
+        )}
 
-        <div className="error">
-          ⚠️ {error}
-        </div>
-
-      ) : (
-
-        <ResponsiveContainer>
-
-          <LineChart data={data}>
-
-            <CartesianGrid
-              strokeDasharray="3 3"
-            />
-
-            <XAxis dataKey="date" />
-
-            <YAxis />
-
-            <Tooltip
-              content={<CustomTooltip />}
-            />
-
-            <Line
-              type="monotone"
-              dataKey="price"
-              stroke={
-                isUp
-                  ? "#16a34a"
-                  : "#dc2626"
-              }
-              strokeWidth={3}
-              dot={false}
-              activeDot={{
-                r: 6
-              }}
-            />
-
-          </LineChart>
-
-        </ResponsiveContainer>
-
-      )}
+      </div>
 
     </div>
-
-  </div>
-
-);
-
+  );
 }
-
 
 export default StockChart;
 
-function CustomTooltip({ active, payload, label }) {
-
-  if (active && payload && payload.length) {
-
+function CustomTooltip({
+  active,
+  payload,
+  label
+}) {
+  if (
+    active &&
+    payload &&
+    payload.length
+  ) {
     return (
-
       <div className="custom-tooltip">
 
         <p className="tooltip-date">
@@ -244,17 +226,15 @@ function CustomTooltip({ active, payload, label }) {
         </p>
 
         <p className="tooltip-price">
-          ¥{payload[0].value.toLocaleString()}
+          ¥
+          {Number(
+            payload[0].value
+          ).toLocaleString()}
         </p>
 
       </div>
-
-      
-
     );
-
   }
 
   return null;
-
 }
