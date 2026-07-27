@@ -104,56 +104,58 @@ function StockChart({
 
       {/* Time Filter */}
       <div className="time-filter">
+  <div className="time-filter-buttons">
 
-  <button
-    className={range === "1H" ? "active" : ""}
-    onClick={() => setRange("1H")}
-  >
-    1H
-  </button>
+    <button
+      className={range === "1H" ? "active" : ""}
+      onClick={() => setRange("1H")}
+    >
+      1H
+    </button>
 
-  <button
-    className={range === "1D" ? "active" : ""}
-    onClick={() => setRange("1D")}
-  >
-    1D
-  </button>
+    <button
+      className={range === "1D" ? "active" : ""}
+      onClick={() => setRange("1D")}
+    >
+      1D
+    </button>
 
-  <button
-    className={range === "1W" ? "active" : ""}
-    onClick={() => setRange("1W")}
-  >
-    1W
-  </button>
+    <button
+      className={range === "1W" ? "active" : ""}
+      onClick={() => setRange("1W")}
+    >
+      1W
+    </button>
 
-  <button
-    className={range === "1M" ? "active" : ""}
-    onClick={() => setRange("1M")}
-  >
-    1M
-  </button>
+    <button
+      className={range === "1M" ? "active" : ""}
+      onClick={() => setRange("1M")}
+    >
+      1M
+    </button>
 
-  <button
-    className={range === "1Y" ? "active" : ""}
-    onClick={() => setRange("1Y")}
-  >
-    1Y
-  </button>
+    <button
+      className={range === "1Y" ? "active" : ""}
+      onClick={() => setRange("1Y")}
+    >
+      1Y
+    </button>
 
-  <button
-    className={range === "5Y" ? "active" : ""}
-    onClick={() => setRange("5Y")}
-  >
-    5Y
-  </button>
+    <button
+      className={range === "5Y" ? "active" : ""}
+      onClick={() => setRange("5Y")}
+    >
+      5Y
+    </button>
 
-  <button
-    className={range === "MAX" ? "active" : ""}
-    onClick={() => setRange("MAX")}
-  >
-    Max
-  </button>
+    <button
+      className={range === "MAX" ? "active" : ""}
+      onClick={() => setRange("MAX")}
+    >
+      Max
+    </button>
 
+  </div>
 </div>
 
       {/* Chart */}
